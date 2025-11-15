@@ -1,4 +1,6 @@
-run = "python app.py"
+modules = ["python-3.11"]
+[agent]
+expertMode = true
 
-[env]
-PYTHONUNBUFFERED = "1"
+[nix]
+channel = "stable-25_05"

@@ -294,11 +294,11 @@ def force_load_model():
 
 
 if __name__ == '__main__':
-    print('Starting Local CPU Assistant Web UI...')
+    print('Starting AI Chat Assistant Web UI...')
     print('Visit http://localhost:5000 in your browser')
     
-    # Allow PORT to be set by hosting provider
+    # Bind to 0.0.0.0:5000 for Replit compatibility
     port = int(os.environ.get('PORT', 5000))
-    host = '0.0.0.0' if os.environ.get('ENVIRONMENT') == 'production' else '127.0.0.1'
+    host = '0.0.0.0'
     
     app.run(debug=False, host=host, port=port)
