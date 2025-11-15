@@ -1,0 +1,63 @@
+Object-Oriented Programming in Python
+
+Object-Oriented Programming (OOP) is a paradigm that organizes code into objects and classes.
+
+Classes and Objects:
+A class is a blueprint for creating objects. An object is an instance of a class.
+
+class Dog:
+    def __init__(self, name, breed):
+        self.name = name
+        self.breed = breed
+    
+    def bark(self):
+        return f"{self.name} is barking!"
+
+# Create an object
+my_dog = Dog("Buddy", "Golden Retriever")
+print(my_dog.bark())  # Output: Buddy is barking!
+
+Attributes and Methods:
+- Attributes: Variables that belong to an object (self.name, self.breed)
+- Methods: Functions that belong to a class (def bark(self))
+
+Inheritance:
+Classes can inherit properties and methods from parent classes:
+
+class Animal:
+    def speak(self):
+        return "Some sound"
+
+class Dog(Animal):
+    def speak(self):
+        return "Woof!"
+
+Encapsulation:
+Hide internal implementation details using private attributes (prefixed with _):
+class Account:
+    def __init__(self, balance):
+        self._balance = balance  # Private attribute
+    
+    def deposit(self, amount):
+        self._balance += amount
+
+Polymorphism:
+Objects of different classes can be treated as objects of a common base class:
+
+animals = [Dog(), Cat(), Bird()]
+for animal in animals:
+    print(animal.speak())  # Each has its own speak() method
+
+Special Methods:
+Python classes can define special methods starting and ending with __ (dunder methods):
+- __init__: Constructor, called when object is created
+- __str__: String representation of object
+- __repr__: Official string representation
+- __len__: Length of object
+- __add__: Addition operator overloading
+
+Best Practices:
+- Use descriptive class and method names
+- Keep classes focused on a single responsibility
+- Use inheritance to share common functionality
+- Document your classes with docstrings

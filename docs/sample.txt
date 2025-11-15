@@ -1,0 +1,7 @@
+This is a small sample document.
+
+The local CPU assistant demo uses this document to show retrieval. Add more .txt files to the docs/ folder and re-run the indexer to include them.
+
+Tips:
+- Keep each file focused (one topic) for better retrieval.
+- Include titles at the top for clearer metadata.

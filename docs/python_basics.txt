@@ -1,0 +1,41 @@
+Python Programming Basics
+
+Python is a high-level, interpreted programming language known for its simple and readable syntax. It was created by Guido van Rossum and first released in 1991.
+
+Key Features of Python:
+- Simple and readable syntax that emphasizes code readability
+- Dynamically typed (no need to declare variable types)
+- Supports multiple programming paradigms (procedural, object-oriented, functional)
+- Extensive standard library with modules for various tasks
+- Interpreted language that runs on multiple platforms
+
+Data Types:
+Python supports several built-in data types:
+- Integers: whole numbers like 42, -10, 0
+- Floats: decimal numbers like 3.14, -2.5
+- Strings: text data enclosed in quotes like "hello"
+- Lists: ordered collections like [1, 2, 3, "hello"]
+- Dictionaries: key-value pairs like {"name": "John", "age": 30}
+- Tuples: immutable lists like (1, 2, 3)
+- Sets: unordered collections like {1, 2, 3}
+
+Variables and Assignment:
+Variables are created by assigning a value using the equals sign:
+x = 10
+name = "Alice"
+items = [1, 2, 3]
+
+Control Flow:
+Python uses indentation to define code blocks:
+- if/elif/else statements for conditional execution
+- for loops for iterating over sequences
+- while loops for repeating code while a condition is true
+
+Functions:
+Functions are reusable blocks of code defined with the def keyword:
+def greet(name):
+    return f"Hello, {name}!"
+
+Comments:
+Single-line comments start with # and explain code
+Multi-line comments use triple quotes """ """

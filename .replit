@@ -1,0 +1,4 @@
+run = "python app.py"
+
+[env]
+PYTHONUNBUFFERED = "1"
