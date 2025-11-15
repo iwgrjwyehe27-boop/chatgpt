@@ -153,9 +153,6 @@ def ask():
     images = data.get('images', [])
     chat_id = data.get('chat_id')
     
-    if not question:
-        return jsonify({'error': 'Question cannot be empty'}), 400
-    
     if not chat_id:
         return jsonify({'error': 'Chat ID required'}), 400
     
@@ -166,7 +163,7 @@ def ask():
     user_message = Message(
         chat_id=chat_id,
         role='user',
-        content=question,
+        content=question or '[Image message]',
         images_json=json.dumps(images) if images else None
     )
     db.session.add(user_message)

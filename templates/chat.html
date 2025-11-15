@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat</title>
+    <title>FrankieGPT</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <style>
         :root{
             --bg:#0b1020;
@@ -23,12 +25,10 @@
         @keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
 
         /* Sidebar */
         .sidebar{width:260px;background:#071021;border-right:1px solid rgba(255,255,255,0.03);padding:18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;animation:slideIn 0.3s ease}
-        .brand{color:var(--text);font-weight:700;margin-bottom:6px;font-size:14px}
+        .brand{color:var(--text);font-weight:700;margin-bottom:6px;font-size:14px;display:flex;align-items:center;gap:8px}
         .brand-logo{width:28px;height:28px}
         .new-chat-btn{color:var(--text);padding:10px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);font-size:13px;text-align:left;transition:all 0.2s ease}
         .new-chat-btn:hover{background:rgba(255,255,255,0.1);transform:translateY(-2px)}
@@ -44,17 +44,17 @@
         .chat-item-btn:hover{background:rgba(255,255,255,0.2);color:var(--text);transform:scale(1.1)}
         .sidebar-footer{margin-top:auto;border-top:1px solid rgba(255,255,255,0.05);padding-top:12px}
         .user-profile{display:flex;align-items:center;gap:10px;color:var(--text);font-size:13px;padding:8px;transition:all 0.2s ease}
-        .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
-        .user-name{flex:1;cursor:pointer;transition:all 0.2s ease}
-        .user-name:hover{color:var(--accent)}
-        .rename-btn{background:rgba(255,255,255,0.1);border:none;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:4px;font-size:11px;transition:all 0.2s ease}
-        .rename-btn:hover{background:rgba(255,255,255,0.2);color:var(--text)}
+        .user-avatar{width:32px;height:32px;border-radius:50%;overflow:hidden}
+        .user-avatar img{width:100%;height:100%;object-fit:cover}
+        .user-name{flex:1}
+        .logout-btn{background:rgba(255,255,255,0.1);border:none;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:4px;font-size:11px;transition:all 0.2s ease;text-decoration:none;display:inline-block}
+        .logout-btn:hover{background:rgba(255,255,255,0.2);color:var(--text)}
 
         /* Main content */
         .main{flex:1;display:flex;flex-direction:column}
         .main-inner{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column}
 
-        /* Hero section - shown only when no chat */
+        /* Hero section */
         .hero-section{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:20px;animation:fadeIn 0.5s ease}
         .hero-title{font-size:32px;font-weight:600;color:var(--text);text-align:center}
         .hero-subtitle{color:var(--muted);font-size:16px}
@@ -65,73 +65,47 @@
         .chat-messages.hidden{display:none}
         .message{display:flex;gap:12px;margin-bottom:8px;animation:slideUp 0.3s ease}
         .message.user{justify-content:flex-end}
-        .message.user .content{background:var(--accent-2);color:#fff;max-width:70%;border-radius:12px;padding:12px 16px;word-wrap:break-word;line-height:1.5;transition:all 0.2s ease}
-        .message.user .content:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(16,163,127,0.2)}
-        .message.assistant .content{background:#0b1320;color:var(--text);max-width:70%;border-radius:12px;padding:12px 16px;word-wrap:break-word;border:1px solid rgba(255,255,255,0.02);line-height:1.5;transition:all 0.2s ease}
-        .message.assistant .content:hover{border-color:rgba(255,255,255,0.05);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
-        .message.assistant .content strong{color:#10a37f;font-weight:700}
-        .message.assistant .content br{display:block;height:0.5em;content:""}
-        .message.assistant .content h1{font-size:20px;font-weight:700;margin:12px 0 6px 0;color:#10a37f}
-        .message.assistant .content h2{font-size:18px;font-weight:700;margin:10px 0 4px 0;color:#10a37f}
-        .message.assistant .content h3{font-size:16px;font-weight:700;margin:8px 0 4px 0;color:#10a37f}
+        .message.user .content{background:var(--accent-2);color:#fff;max-width:70%;border-radius:12px;padding:12px 16px;word-wrap:break-word;line-height:1.5}
+        .message.assistant .content{background:#0b1320;color:var(--text);max-width:70%;border-radius:12px;padding:12px 16px;word-wrap:break-word;border:1px solid rgba(255,255,255,0.02);line-height:1.5}
 
         /* Input area */
-        .input-section{padding:18px;border-top:1px solid rgba(255,255,255,0.02);background:transparent;animation:slideUp 0.3s ease}
+        .input-section{padding:18px;border-top:1px solid rgba(255,255,255,0.02);background:transparent}
         .input-wrapper{max-width:880px;margin:0 auto;width:100%}
         .input-form{display:flex;gap:8px;align-items:flex-end}
-        .model-selector{position:relative;display:inline-block}
-        .model-selector-btn{appearance:none;-webkit-appearance:none;-moz-appearance:none;background:linear-gradient(135deg,rgba(124,92,255,0.15) 0%,rgba(16,163,127,0.08) 100%);border:1px solid rgba(124,92,255,0.5);color:var(--accent);padding:8px 20px 8px 12px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;outline:none;font-family:inherit;min-width:140px;transition:all 0.2s ease;box-shadow:0 1px 3px rgba(124,92,255,0.08);display:flex;align-items:center;gap:3px;white-space:nowrap}
-        .model-selector-btn:hover{background:linear-gradient(135deg,rgba(124,92,255,0.25) 0%,rgba(16,163,127,0.15) 100%);border-color:rgba(124,92,255,0.7);box-shadow:0 2px 6px rgba(124,92,255,0.12)}
-        .model-selector-btn:focus{background:linear-gradient(135deg,rgba(124,92,255,0.25) 0%,rgba(16,163,127,0.15) 100%);border-color:rgba(124,92,255,0.7);box-shadow:0 0 0 2px rgba(124,92,255,0.1)}
-        .model-selector-dropdown{display:none;position:absolute;bottom:100%;left:0;background:var(--panel);border:1px solid rgba(255,255,255,0.1);border-radius:8px;margin-bottom:6px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:1000;max-height:280px;overflow-y:auto;animation:slideUp 0.2s ease}
-        .model-selector-dropdown.active{display:block}
-        .model-selector-dropdown-item{padding:8px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all 0.15s ease;border-left:2px solid transparent;color:var(--text);font-size:12px}
-        .model-selector-dropdown-item:hover{background:rgba(124,92,255,0.1);border-left-color:var(--accent)}
-        .model-selector-dropdown-item.selected{background:rgba(124,92,255,0.15);border-left-color:var(--accent);color:var(--accent);font-weight:600}
-        .model-selector-dropdown-item-icon{font-size:14px;width:16px;text-align:center;display:none}
-        .model-selector::after{content:'';position:absolute;top:50%;right:8px;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--accent);pointer-events:none}
         .textarea-wrapper{flex:1;display:flex;gap:0;align-items:flex-end;position:relative}
         .input-form textarea{flex:1;padding:12px 14px;padding-right:50px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:rgba(255,255,255,0.02);color:var(--text);resize:none;max-height:120px;min-height:48px;font-family:inherit;font-size:14px;transition:all 0.2s ease}
         .input-form textarea:focus{outline:none;border-color:var(--accent);background:rgba(255,255,255,0.03)}
         .input-form button{background:var(--accent);color:white;padding:0;border:none;border-radius:8px;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;width:48px;height:48px;font-size:24px;transition:all 0.2s ease}
         .input-form button:hover:not(:disabled){background:rgba(124,92,255,0.8);transform:scale(1.05)}
-        .input-form button:active:not(:disabled){transform:scale(0.95)}
         .input-form button:disabled{background:var(--muted);cursor:not-allowed;opacity:0.5}
         .input-form .img-btn{position:absolute;right:6px;bottom:6px;background:transparent;color:var(--muted);width:40px;height:40px;padding:0;display:flex;align-items:center;justify-content:center;font-size:20px;border-radius:6px;transition:all 0.2s ease}
         .input-form .img-btn:hover{background:rgba(255,255,255,0.1);color:var(--text);transform:scale(1.1)}
         #sendBtn{transform:rotate(90deg)}
         .image-preview{display:flex;gap:8px;padding:8px 14px;flex-wrap:wrap;margin-bottom:8px}
-        .image-thumb{width:60px;height:60px;border-radius:8px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.1);animation:slideUp 0.3s ease;transition:all 0.2s ease}
-        .image-thumb:hover{transform:scale(1.05);border-color:rgba(255,255,255,0.2)}
+        .image-thumb{width:60px;height:60px;border-radius:8px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.1)}
         .image-thumb img{width:100%;height:100%;object-fit:cover}
-        .image-thumb .remove{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:4px;padding:2px 4px;cursor:pointer;font-size:11px;display:none;transition:all 0.2s ease}
-        .image-thumb:hover .remove{display:block;animation:slideUp 0.2s ease}
+        .image-thumb .remove{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:4px;padding:2px 4px;cursor:pointer;font-size:11px;display:none}
+        .image-thumb:hover .remove{display:block}
         .message-images{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-        .message-image{max-width:300px;max-height:300px;border-radius:8px;object-fit:cover;animation:slideUp 0.3s ease;transition:all 0.2s ease;cursor:pointer}
-        .message-image:hover{transform:scale(1.02)}
+        .message-image{max-width:300px;max-height:300px;border-radius:8px;object-fit:cover}
 
         /* Modal */
-        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;animation:fadeIn 0.2s ease}
-        .modal.active{display:flex;animation:fadeIn 0.2s ease}
-        .modal-content{background:var(--panel);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:24px;max-width:400px;width:90%;animation:slideUp 0.3s ease}
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center}
+        .modal.active{display:flex}
+        .modal-content{background:var(--panel);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:24px;max-width:400px;width:90%}
         .modal-title{font-size:18px;font-weight:600;margin-bottom:16px;color:var(--text)}
-        .modal-input{width:100%;padding:10px 12px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:rgba(255,255,255,0.05);color:var(--text);font-size:14px;margin-bottom:16px;transition:all 0.2s ease}
-        .modal-input:focus{outline:none;border-color:var(--accent);background:rgba(255,255,255,0.08)}
+        .modal-input{width:100%;padding:10px 12px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:rgba(255,255,255,0.05);color:var(--text);font-size:14px;margin-bottom:16px}
+        .modal-input:focus{outline:none;border-color:var(--accent)}
         .modal-buttons{display:flex;gap:12px;justify-content:flex-end}
-        .modal-btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;transition:all 0.2s ease}
+        .modal-btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px}
         .modal-btn.confirm{background:var(--accent);color:white}
-        .modal-btn.confirm:hover{background:rgba(124,92,255,0.8);transform:translateY(-2px)}
-        .modal-btn.confirm:active{transform:translateY(0)}
         .modal-btn.cancel{background:rgba(255,255,255,0.05);color:var(--muted)}
-        .modal-btn.cancel:hover{background:rgba(255,255,255,0.1);color:var(--text)}
-
-        @media (max-width:900px){.sidebar{width:0;padding:0;border:none}.main-inner{padding:16px}}
     </style>
 </head>
 <body>
-    <div class="app" id="app">
+    <div class="app">
         <aside class="sidebar">
-            <div class="brand">AI Chat</div>
+            <div class="brand">
                 <img src="/static/favicon.svg" alt="Logo" class="brand-logo">
                 FrankieGPT
             </div>
@@ -144,9 +118,17 @@
 
             <div class="sidebar-footer">
                 <div class="user-profile">
-                    <div class="user-avatar" id="userAvatar">U</div>
-                    <div class="user-name" id="userName">User</div>
-                    <button class="rename-btn" id="renameBtn"></button>
+                    <div class="user-avatar">
+                        {% if user.profile_image_url %}
+                        <img src="{{ user.profile_image_url }}" alt="Profile">
+                        {% else %}
+                        <div style="width:100%;height:100%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700">
+                            {{ user.first_name[0] if user.first_name else 'U' }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="user-name">{{ user.first_name or 'User' }}</div>
+                    <a href="/auth/logout" class="logout-btn">Logout</a>
                 </div>
             </div>
         </aside>
@@ -161,37 +143,10 @@
                 <div class="chat-messages hidden" id="chatMessages"></div>
             </div>
 
-            <div class="input-section" id="inputSection">
+            <div class="input-section">
                 <div class="input-wrapper">
                     <div class="image-preview" id="imagePreview"></div>
                     <form class="input-form" id="chatForm">
-                        <div class="model-selector" style="position:relative;">
-                            <button type="button" class="model-selector-btn" id="modelSelectorBtn">
-                                <span id="modelLabel" style="font-size:14px;overflow:hidden;text-overflow:ellipsis;flex:1;">Model: GPT-4 Mini</span>
-                            </button>
-            <div class="model-selector-dropdown" id="modelDropdown">
-                                <div class="model-selector-dropdown-item" data-model="gpt-4o-mini">
-                                    <span class="model-selector-dropdown-item-icon"></span>
-                                    <span>GPT-4 Mini</span>
-                                </div>
-                                <div class="model-selector-dropdown-item" data-model="gpt-4o">
-                                    <span class="model-selector-dropdown-item-icon"></span>
-                                    <span>GPT-4 Omni</span>
-                                </div>
-                                <div class="model-selector-dropdown-item" data-model="anthropic/claude-3.5-sonnet">
-                                    <span class="model-selector-dropdown-item-icon"></span>
-                                    <span>Claude 3.5</span>
-                                </div>
-                                <div class="model-selector-dropdown-item" data-model="google/gemini-2.0-flash-001">
-                                    <span class="model-selector-dropdown-item-icon"></span>
-                                    <span>Gemini 2.0</span>
-                                </div>
-                                <div class="model-selector-dropdown-item" data-model="meta-llama/llama-3.3-70b-instruct">
-                                    <span class="model-selector-dropdown-item-icon"></span>
-                                    <span>Llama 3.3</span>
-                                </div>
-                            </div>
-                        </div>
                         <div class="textarea-wrapper">
                             <textarea id="messageInput" placeholder="Send a message..." autocomplete="off"></textarea>
                             <button type="button" class="img-btn" id="imageBtn" title="Add image">📎</button>
@@ -202,17 +157,6 @@
                 </div>
             </div>
         </main>
-    </div>
-
-    <div class="modal" id="renameModal">
-        <div class="modal-content">
-            <div class="modal-title">Rename Profile</div>
-            <input type="text" class="modal-input" id="renameInput" placeholder="Enter your name">
-            <div class="modal-buttons">
-                <button class="modal-btn cancel" id="cancelBtn">Cancel</button>
-                <button class="modal-btn confirm" id="confirmBtn">Save</button>
-            </div>
-        </div>
     </div>
 
     <div class="modal" id="renameChatModal">
@@ -229,7 +173,7 @@
     <div class="modal" id="deleteChatModal">
         <div class="modal-content">
             <div class="modal-title">Delete Chat</div>
-            <div style="color:var(--muted);margin-bottom:20px">Are you sure you want to delete this chat? This action cannot be undone.</div>
+            <div style="color:var(--muted);margin-bottom:20px">Are you sure you want to delete this chat?</div>
             <div class="modal-buttons">
                 <button class="modal-btn cancel" id="deleteChatCancelBtn">Cancel</button>
                 <button class="modal-btn confirm" id="deleteChatConfirmBtn">Delete</button>
@@ -238,215 +182,106 @@
     </div>
 
     <script>
-        let userData = {
-            name: 'User',
-            chats: {},
-            currentChat: null,
-            selectedModel: 'gpt-4o-mini'
-        };
+        let currentChatId = null;
+        let attachedImages = [];
 
-        function getUserId() {
-            let id = localStorage.getItem('__user_device_id');
-            if (!id) {
-                id = 'device_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('__user_device_id', id);
+        async function loadChats() {
+            try {
+                const res = await fetch('/api/chats');
+                const data = await res.json();
+                const chatList = document.getElementById('chatList');
+                chatList.innerHTML = '';
+
+                data.chats.forEach(chat => {
+                    const item = document.createElement('div');
+                    item.className = 'chat-item' + (currentChatId === chat.id ? ' active' : '');
+
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'chat-item-title';
+                    titleDiv.textContent = chat.title;
+                    titleDiv.onclick = () => loadChat(chat.id);
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'chat-item-actions';
+
+                    const renameBtn = document.createElement('button');
+                    renameBtn.className = 'chat-item-btn';
+                    renameBtn.textContent = '✎';
+                    renameBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        document.getElementById('renameChatInput').value = chat.title;
+                        document.getElementById('renameChatModal').classList.add('active');
+                        document.getElementById('renameChatModal').dataset.chatId = chat.id;
+                    };
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'chat-item-btn';
+                    deleteBtn.textContent = '🗑️';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        document.getElementById('deleteChatModal').classList.add('active');
+                        document.getElementById('deleteChatModal').dataset.chatId = chat.id;
+                    };
+
+                    actionsDiv.appendChild(renameBtn);
+                    actionsDiv.appendChild(deleteBtn);
+                    item.appendChild(titleDiv);
+                    item.appendChild(actionsDiv);
+                    chatList.appendChild(item);
+                });
+            } catch (err) {
+                console.error('Failed to load chats:', err);
             }
-            return id;
         }
 
-        function loadUserData() {
-            const userId = getUserId();
-            const stored = localStorage.getItem('__user_data_' + userId);
-            if (stored) {
-                try {
-                    userData = JSON.parse(stored);
-                } catch (e) {
-                    console.error('Failed to parse user data:', e);
-                }
+        async function loadChat(chatId) {
+            try {
+                const res = await fetch(`/api/chats/${chatId}`);
+                const data = await res.json();
+                currentChatId = chatId;
+
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.innerHTML = '';
+
+                data.chat.messages.forEach(msg => {
+                    const div = document.createElement('div');
+                    div.className = 'message ' + msg.role;
+                    const content = document.createElement('div');
+                    content.className = 'content';
+                    content.textContent = msg.text;
+
+                    if (msg.images && msg.images.length > 0) {
+                        const imagesContainer = document.createElement('div');
+                        imagesContainer.className = 'message-images';
+                        msg.images.forEach(imgBase64 => {
+                            const img = document.createElement('img');
+                            img.src = 'data:image/jpeg;base64,' + imgBase64;
+                            img.className = 'message-image';
+                            imagesContainer.appendChild(img);
+                        });
+                        content.appendChild(imagesContainer);
+                    }
+
+                    div.appendChild(content);
+                    chatMessages.appendChild(div);
+                });
+
+                document.getElementById('heroSection').classList.add('hidden');
+                document.getElementById('chatMessages').classList.remove('hidden');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                loadChats();
+            } catch (err) {
+                console.error('Failed to load chat:', err);
             }
-            // Always start on hero section (no current chat)
-            userData.currentChat = null;
-
-            // Load selected model and update label
-            if (userData.selectedModel) {
-                // Clear all selected states first
-                document.querySelectorAll('.model-selector-dropdown-item').forEach(i => i.classList.remove('selected'));
-
-                const modelItem = document.querySelector(`[data-model="${userData.selectedModel}"]`);
-                if (modelItem) {
-                    document.getElementById('modelLabel').textContent = 'Model: ' + modelItem.textContent.trim();
-                    modelItem.classList.add('selected');
-                }
-            } else {
-                // Set default to first model if none selected
-                const firstModel = document.querySelector('.model-selector-dropdown-item');
-                if (firstModel) {
-                    document.querySelectorAll('.model-selector-dropdown-item').forEach(i => i.classList.remove('selected'));
-                    firstModel.classList.add('selected');
-                    userData.selectedModel = firstModel.dataset.model;
-                    document.getElementById('modelLabel').textContent = 'Model: ' + firstModel.textContent.trim();
-                }
-            }
-
-            updateUI();
         }
 
-        function saveUserData() {
-            const userId = getUserId();
-            localStorage.setItem('__user_data_' + userId, JSON.stringify(userData));
-        }
-
-        function createNewChat() {
-            const chatId = 'chat_' + Date.now();
-            userData.currentChat = chatId;
-            userData.chats[chatId] = {
-                title: 'New Chat',
-                timestamp: Date.now(),
-                messages: []
-            };
-            saveUserData();
-            updateUI();
+        async function createNewChat() {
+            currentChatId = 'chat_' + Date.now();
             document.getElementById('heroSection').classList.remove('hidden');
             document.getElementById('chatMessages').classList.add('hidden');
             document.getElementById('messageInput').focus();
         }
 
-        function addMessage(text, role, images = []) {
-            if (!userData.currentChat) {
-                // Create new chat but don't update UI visibility yet
-                const chatId = 'chat_' + Date.now();
-                userData.currentChat = chatId;
-                userData.chats[chatId] = {
-                    title: 'New Chat',
-                    timestamp: Date.now(),
-                    messages: []
-                };
-            }
-
-            const msg = { text, role, timestamp: Date.now(), images: images || [] };
-            userData.chats[userData.currentChat].messages.push(msg);
-
-            if (userData.chats[userData.currentChat].title === 'New Chat' && role === 'user') {
-                userData.chats[userData.currentChat].title = text.substring(0, 30) + (text.length > 30 ? '...' : '');
-            }
-
-            saveUserData();
-            renderChat();
-        }
-
-        function renderChat() {
-            const chatMessages = document.getElementById('chatMessages');
-            if (!userData.currentChat) return;
-
-            const messages = userData.chats[userData.currentChat].messages || [];
-            chatMessages.innerHTML = '';
-            messages.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = 'message ' + msg.role;
-                const content = document.createElement('div');
-                content.className = 'content';
-
-                // Parse markdown: convert ### to <h3>, ** to <strong>, and \n to <br>
-                let html = msg.text
-                    .replace(/### (.*?)(?=\n|$)/g, '<h3>$1</h3>')
-                    .replace(/## (.*?)(?=\n|$)/g, '<h2>$1</h2>')
-                    .replace(/# (.*?)(?=\n|$)/g, '<h1>$1</h1>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\n/g, '<br>');
-                content.innerHTML = html;
-
-                // Add images if present
-                if (msg.images && msg.images.length > 0) {
-                    const imagesContainer = document.createElement('div');
-                    imagesContainer.className = 'message-images';
-                    msg.images.forEach(imgBase64 => {
-                        const img = document.createElement('img');
-                        img.src = 'data:image/jpeg;base64,' + imgBase64;
-                        img.className = 'message-image';
-                        imagesContainer.appendChild(img);
-                    });
-                    content.appendChild(imagesContainer);
-                }
-
-                div.appendChild(content);
-                chatMessages.appendChild(div);
-            });
-            // Ensure messages are rendered before scrolling
-            setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 10);
-        }
-
-        function updateUI() {
-            document.getElementById('userName').textContent = userData.name;
-            document.getElementById('userAvatar').textContent = userData.name.charAt(0).toUpperCase();
-
-            const chatList = document.getElementById('chatList');
-            chatList.innerHTML = '';
-
-            // Sort chats by timestamp (newest first)
-            const sortedChats = Object.entries(userData.chats).sort((a, b) => b[1].timestamp - a[1].timestamp);
-
-            sortedChats.forEach(([chatId, chat]) => {
-                const item = document.createElement('div');
-                item.className = 'chat-item' + (userData.currentChat === chatId ? ' active' : '');
-
-                const titleDiv = document.createElement('div');
-                titleDiv.className = 'chat-item-title';
-                titleDiv.textContent = chat.title;
-                titleDiv.onclick = () => {
-                    userData.currentChat = chatId;
-                    saveUserData();
-                    updateUI();
-                    renderChat();
-                    document.getElementById('heroSection').classList.add('hidden');
-                    document.getElementById('chatMessages').classList.remove('hidden');
-                    document.getElementById('messageInput').focus();
-                };
-
-                const actionsDiv = document.createElement('div');
-                actionsDiv.className = 'chat-item-actions';
-
-                const renameBtn = document.createElement('button');
-                renameBtn.className = 'chat-item-btn';
-                renameBtn.textContent = '✎';
-                renameBtn.title = 'Rename';
-                renameBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    document.getElementById('renameChatInput').value = chat.title;
-                    document.getElementById('renameChatModal').classList.add('active');
-                    document.getElementById('renameChatModal').dataset.chatId = chatId;
-                };
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'chat-item-btn';
-                deleteBtn.textContent = '🗑️';
-                deleteBtn.title = 'Delete';
-                deleteBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    document.getElementById('deleteChatModal').classList.add('active');
-                    document.getElementById('deleteChatModal').dataset.chatId = chatId;
-                };
-
-                actionsDiv.appendChild(renameBtn);
-                actionsDiv.appendChild(deleteBtn);
-
-                item.appendChild(titleDiv);
-                item.appendChild(actionsDiv);
-                chatList.appendChild(item);
-            });
-
-            if (userData.currentChat && userData.chats[userData.currentChat].messages.length > 0) {
-                document.getElementById('heroSection').classList.add('hidden');
-                document.getElementById('chatMessages').classList.remove('hidden');
-                renderChat();
-            } else if (!userData.currentChat) {
-                document.getElementById('heroSection').classList.remove('hidden');
-                document.getElementById('chatMessages').classList.add('hidden');
-            }
-        }
-
-        let attachedImages = [];  // Store base64 images for current message
-
-        // Image handling
         function updateImagePreview() {
             const preview = document.getElementById('imagePreview');
             preview.innerHTML = '';
@@ -454,14 +289,13 @@
                 const thumb = document.createElement('div');
                 thumb.className = 'image-thumb';
                 const img = document.createElement('img');
-                img.src = 'data:image/jpeg;base64,' + imgBase64.substring(0, 100) === 'data:' ? imgBase64 : 'data:image/jpeg;base64,' + imgBase64;
+                img.src = 'data:image/jpeg;base64,' + imgBase64;
                 thumb.appendChild(img);
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'remove';
                 removeBtn.textContent = '✕';
                 removeBtn.type = 'button';
-                removeBtn.onclick = (e) => {
-                    e.preventDefault();
+                removeBtn.onclick = () => {
                     attachedImages.splice(idx, 1);
                     updateImagePreview();
                 };
@@ -469,6 +303,8 @@
                 preview.appendChild(thumb);
             });
         }
+
+        document.getElementById('newChatBtn').addEventListener('click', createNewChat);
 
         document.getElementById('imageBtn').addEventListener('click', (e) => {
             e.preventDefault();
@@ -478,74 +314,52 @@
         document.getElementById('imageInput').addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             let processed = 0;
-
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    // Extract base64 without data:image/jpeg;base64, prefix
-                    let base64 = event.target.result.split(',')[1];
-                    attachedImages.push(base64);
+                    attachedImages.push(event.target.result.split(',')[1]);
                     processed++;
-
                     if (processed === files.length) {
                         updateImagePreview();
-                        document.getElementById('imageInput').value = '';  // Reset input
+                        document.getElementById('imageInput').value = '';
                     }
                 };
                 reader.readAsDataURL(file);
             });
         });
 
-        document.getElementById('newChatBtn').addEventListener('click', createNewChat);
-        document.getElementById('renameBtn').addEventListener('click', () => {
-            document.getElementById('renameInput').value = userData.name;
-            document.getElementById('renameModal').classList.add('active');
-        });
-        document.getElementById('cancelBtn').addEventListener('click', () => {
-            document.getElementById('renameModal').classList.remove('active');
-        });
-        document.getElementById('confirmBtn').addEventListener('click', () => {
-            const newName = document.getElementById('renameInput').value.trim();
-            if (newName) {
-                userData.name = newName;
-                saveUserData();
-                updateUI();
-                document.getElementById('renameModal').classList.remove('active');
-            }
-        });
-
-        // Chat rename modal
         document.getElementById('renameChatCancelBtn').addEventListener('click', () => {
             document.getElementById('renameChatModal').classList.remove('active');
         });
-        document.getElementById('renameChatConfirmBtn').addEventListener('click', () => {
+
+        document.getElementById('renameChatConfirmBtn').addEventListener('click', async () => {
             const chatId = document.getElementById('renameChatModal').dataset.chatId;
             const newTitle = document.getElementById('renameChatInput').value.trim();
-            if (newTitle && userData.chats[chatId]) {
-                userData.chats[chatId].title = newTitle;
-                saveUserData();
-                updateUI();
+            if (newTitle) {
+                await fetch(`/api/chats/${chatId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({title: newTitle})
+                });
+                loadChats();
                 document.getElementById('renameChatModal').classList.remove('active');
             }
         });
 
-        // Chat delete modal
         document.getElementById('deleteChatCancelBtn').addEventListener('click', () => {
             document.getElementById('deleteChatModal').classList.remove('active');
         });
-        document.getElementById('deleteChatConfirmBtn').addEventListener('click', () => {
+
+        document.getElementById('deleteChatConfirmBtn').addEventListener('click', async () => {
             const chatId = document.getElementById('deleteChatModal').dataset.chatId;
-            if (userData.chats[chatId]) {
-                delete userData.chats[chatId];
-                if (userData.currentChat === chatId) {
-                    userData.currentChat = null;
-                }
-                saveUserData();
-                updateUI();
-                document.getElementById('deleteChatModal').classList.remove('active');
+            await fetch(`/api/chats/${chatId}`, {method: 'DELETE'});
+            if (currentChatId === chatId) {
+                currentChatId = null;
                 document.getElementById('heroSection').classList.remove('hidden');
                 document.getElementById('chatMessages').classList.add('hidden');
             }
+            loadChats();
+            document.getElementById('deleteChatModal').classList.remove('active');
         });
 
         document.getElementById('chatForm').addEventListener('submit', async (e) => {
@@ -553,42 +367,58 @@
             const text = document.getElementById('messageInput').value.trim();
             if (!text && attachedImages.length === 0) return;
 
+            if (!currentChatId) {
+                currentChatId = 'chat_' + Date.now();
+                await fetch('/api/chats', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id: currentChatId, title: text.substring(0, 30)})
+                });
+            }
+
             document.getElementById('heroSection').classList.add('hidden');
             document.getElementById('chatMessages').classList.remove('hidden');
-
-            const displayText = text || '[Image message]';
-            addMessage(displayText, 'user', attachedImages);
-            updateUI(); // Update sidebar to show new chat
             document.getElementById('messageInput').value = '';
             document.getElementById('sendBtn').disabled = true;
 
-            // Force re-render after adding user message
-            renderChat();
+            const chatMessages = document.getElementById('chatMessages');
+            const userDiv = document.createElement('div');
+            userDiv.className = 'message user';
+            const userContent = document.createElement('div');
+            userContent.className = 'content';
+            userContent.textContent = text || '[Image message]';
+            userDiv.appendChild(userContent);
+            chatMessages.appendChild(userDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
 
             try {
                 const res = await fetch('/api/ask', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
                         question: text,
-                        model: userData.selectedModel,
+                        chat_id: currentChatId,
                         images: attachedImages.length > 0 ? attachedImages : undefined
                     })
                 });
                 const data = await res.json();
-                if (data.response) {
-                    addMessage(data.response, 'assistant');
-                } else {
-                    addMessage('Error: ' + (data.error || 'Unknown error'), 'assistant');
-                }
+
+                const assistantDiv = document.createElement('div');
+                assistantDiv.className = 'message assistant';
+                const assistantContent = document.createElement('div');
+                assistantContent.className = 'content';
+                assistantContent.textContent = data.response || ('Error: ' + (data.error || 'Unknown error'));
+                assistantDiv.appendChild(assistantContent);
+                chatMessages.appendChild(assistantDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                loadChats();
             } catch (err) {
-                addMessage('Connection error: ' + err.message, 'assistant');
+                console.error('Error:', err);
             }
 
-            // Clear attached images after sending
             attachedImages = [];
             updateImagePreview();
-
             document.getElementById('sendBtn').disabled = false;
             document.getElementById('messageInput').focus();
         });
@@ -600,44 +430,7 @@
             }
         });
 
-        // Model selection dropdown
-        const modelSelectorBtn = document.getElementById('modelSelectorBtn');
-        const modelDropdown = document.getElementById('modelDropdown');
-        const modelItems = document.querySelectorAll('.model-selector-dropdown-item');
-        const modelLabel = document.getElementById('modelLabel');
-
-        modelSelectorBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            modelDropdown.classList.toggle('active');
-        });
-
-        modelItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.stopPropagation();
-
-                // Remove selected class from all items first
-                modelItems.forEach(i => i.classList.remove('selected'));
-
-                // Add selected class to clicked item
-                item.classList.add('selected');
-
-                const modelValue = item.dataset.model;
-                const modelName = item.textContent.trim();
-
-                userData.selectedModel = modelValue;
-                modelLabel.textContent = 'Model: ' + modelName;
-                saveUserData();
-
-                modelDropdown.classList.remove('active');
-                console.log('Model changed to:', modelValue);
-            });
-        });
-
-        document.addEventListener('click', () => {
-            modelDropdown.classList.remove('active');
-        });
-
-        loadUserData();
+        loadChats();
     </script>
 </body>
 </html>
