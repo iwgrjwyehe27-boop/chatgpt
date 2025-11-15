@@ -9,6 +9,7 @@ from flask import Flask, render_template, request, jsonify, redirect
 from whoosh import index
 from whoosh.qparser import MultifieldParser
 import requests
+from flask import send_from_directory
 
 # Load environment variables from .env file
 try:
@@ -178,6 +179,11 @@ def assemble_prompt(contexts, question):
 def try_run_groq(prompt, max_tokens=64, temperature=0.2):
     """DEPRECATED: This function is no longer used. Use try_run_openrouter() instead."""
     return None, "Groq API is not configured. Please use OpenRouter instead."
+
+
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static', path)
 
 
 @app.route('/')
