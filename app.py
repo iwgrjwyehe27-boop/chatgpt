@@ -17,7 +17,6 @@ try:
 except ImportError:
     pass  # python-dotenv not installed, use system env vars
 
-
 app = Flask(__name__)
 
 PROMPT_TEMPLATE = '''You are a helpful assistant. Use the provided context to answer the user's question. If the answer is not contained in the context, say you don't know.
@@ -53,21 +52,28 @@ if not OPENROUTER_API_KEY:
 OPENROUTER_MODEL = globals().get('OPENROUTER_MODEL', 'gpt-4o-mini')
 
 if not OPENROUTER_API_KEY:
-    raise ValueError("[INIT ERROR] OpenRouter API key not found. Please set OPENROUTER_API_KEY env var or add 'openrouter_api_key=...' to aimode_settings.txt")
+    raise ValueError(
+        "[INIT ERROR] OpenRouter API key not found. Please set OPENROUTER_API_KEY env var or add 'openrouter_api_key=...' to aimode_settings.txt"
+    )
 
 print(f"[INIT] OpenRouter initialized with model: {OPENROUTER_MODEL}")
 
 
-def try_run_openrouter(prompt, max_tokens=2000, temperature=0.2, images=None):
+def try_run_openrouter(prompt,
+                       max_tokens=2000,
+                       temperature=0.2,
+                       images=None,
+                       model=None):
     """Call OpenRouter API for inference using a standard chat completions call.
     Supports multimodal content with images.
     Returns (text, None) on success or (None, error_message) on failure.
-    
+
     Args:
         prompt: Text content of the message
         max_tokens: Maximum tokens in response
         temperature: Temperature for response generation
         images: List of base64-encoded images (optional)
+        model: Model to use (optional, defaults to OPENROUTER_MODEL)
     """
     if not OPENROUTER_API_KEY:
         return None, "OpenRouter API key not configured. Set OPENROUTER_API_KEY or add 'openrouter_api_key=...' to aimode_settings.txt"
@@ -77,7 +83,10 @@ def try_run_openrouter(prompt, max_tokens=2000, temperature=0.2, images=None):
         'Authorization': f'Bearer {OPENROUTER_API_KEY}',
         'Content-Type': 'application/json'
     }
-    
+
+    # Use provided model or default to OPENROUTER_MODEL
+    model_to_use = model or OPENROUTER_MODEL
+
     # Build message content with text and optional images
     content = [{'type': 'text', 'text': prompt}]
     if images:
@@ -89,12 +98,13 @@ def try_run_openrouter(prompt, max_tokens=2000, temperature=0.2, images=None):
                     'detail': 'auto'
                 }
             })
-    
+
     payload = {
-        'model': OPENROUTER_MODEL,
-        'messages': [
-            {'role': 'user', 'content': content if images else prompt}
-        ],
+        'model': model_to_use,
+        'messages': [{
+            'role': 'user',
+            'content': content if images else prompt
+        }],
         'max_tokens': max_tokens,
         'temperature': temperature
     }
@@ -120,11 +130,13 @@ def try_run_openrouter(prompt, max_tokens=2000, temperature=0.2, images=None):
         if len(choices) > 0:
             # choice may contain message.content
             message = choices[0].get('message') or choices[0]
-            text = message.get('content') if isinstance(message, dict) else str(message)
+            text = message.get('content') if isinstance(message,
+                                                        dict) else str(message)
             return (text.strip(), None) if text else (None, None)
         return None, 'No choices in OpenRouter response'
     except Exception as e:
         return None, f"Error parsing OpenRouter response: {e}"
+
 
 # Global index and metadata cache
 ix = None
@@ -185,10 +197,15 @@ def authorize():
 
 @app.route('/api/ask', methods=['POST'])
 def ask():
+    global OPENROUTER_MODEL
+
     data = request.json
     question = data.get('question', '').strip()
     images = data.get('images', [])  # List of base64-encoded images
-    
+    selected_model = data.get(
+        'model',
+        OPENROUTER_MODEL)  # Get model from request, default to current
+
     if not question:
         return jsonify({'error': 'Question cannot be empty'}), 400
 
@@ -196,12 +213,17 @@ def ask():
         print(f"[/api/ask] Received question: {question[:100]}...")
         if images:
             print(f"[/api/ask] Received {len(images)} image(s)")
-        
-        # Call OpenRouter directly with the user's question and optional images
+        print(f"[/api/ask] Using model: {selected_model}")
+
+        # Call OpenRouter with the selected model
         print(f"[/api/ask] Calling try_run_openrouter()...")
-        response, error = try_run_openrouter(question, images=images if images else None)
-        print(f"[/api/ask] try_run_openrouter returned: error={error}, response_type={type(response)}, response_len={len(str(response)) if response else 0}")
-        
+        response, error = try_run_openrouter(question,
+                                             images=images if images else None,
+                                             model=selected_model)
+        print(
+            f"[/api/ask] try_run_openrouter returned: error={error}, response_type={type(response)}, response_len={len(str(response)) if response else 0}"
+        )
+
         if error:
             print(f"[/api/ask] Returning error response: {error}")
             return jsonify({
@@ -209,8 +231,10 @@ def ask():
                 'error': error,
                 'ai_backend': 'openrouter'
             }), 200
-        
-        print(f"[/api/ask] Returning success response with {len(str(response)) if response else 0} chars")
+
+        print(
+            f"[/api/ask] Returning success response with {len(str(response)) if response else 0} chars"
+        )
         return jsonify({
             'response': response,
             'error': None,
@@ -242,8 +266,18 @@ def list_models():
     """Return a list of available Groq models."""
     # Available Groq models (verified working)
     groq_models = [
-        {'name': 'llama2-70b-4096', 'provider': 'Groq', 'size': '70B', 'context': 4096},
-        {'name': 'gemma-7b-it', 'provider': 'Groq', 'size': '7B', 'context': 8192},
+        {
+            'name': 'llama2-70b-4096',
+            'provider': 'Groq',
+            'size': '70B',
+            'context': 4096
+        },
+        {
+            'name': 'gemma-7b-it',
+            'provider': 'Groq',
+            'size': '7B',
+            'context': 8192
+        },
     ]
     return jsonify({'models': groq_models}), 200
 
@@ -252,14 +286,16 @@ def list_models():
 def select_model():
     """Select an OpenRouter model."""
     global OPENROUTER_MODEL
-    
+
     data = request.json
     model_name = data.get('model_name')
-    
+
     if model_name:
         OPENROUTER_MODEL = model_name
-        print(f"[/api/models/select] Switched to OpenRouter model: {OPENROUTER_MODEL}")
-    
+        print(
+            f"[/api/models/select] Switched to OpenRouter model: {OPENROUTER_MODEL}"
+        )
+
     return jsonify({
         'current_model': OPENROUTER_MODEL,
         'message': 'Model updated'
@@ -270,19 +306,24 @@ def select_model():
 def force_load_model():
     """Test the OpenRouter API key and selected model."""
     try:
-        print(f"[/api/models/force-load] Testing OpenRouter API with model: {OPENROUTER_MODEL}")
-        response, error = try_run_openrouter("Hello, test.", max_tokens=10, temperature=0.2)
-        
+        print(
+            f"[/api/models/force-load] Testing OpenRouter API with model: {OPENROUTER_MODEL}"
+        )
+        response, error = try_run_openrouter("Hello, test.",
+                                             max_tokens=10,
+                                             temperature=0.2)
+
         if error:
             return jsonify({
                 'success': False,
                 'error': error,
                 'message': 'OpenRouter API test failed'
             }), 400
-        
+
         return jsonify({
             'success': True,
-            'message': f'OpenRouter API is working. Using model: {OPENROUTER_MODEL}',
+            'message':
+            f'OpenRouter API is working. Using model: {OPENROUTER_MODEL}',
             'model': OPENROUTER_MODEL
         }), 200
     except Exception as e:
@@ -294,11 +335,12 @@ def force_load_model():
 
 
 if __name__ == '__main__':
-    print('Starting AI Chat Assistant Web UI...')
+    print('Starting Local CPU Assistant Web UI...')
     print('Visit http://localhost:5000 in your browser')
-    
-    # Bind to 0.0.0.0:5000 for Replit compatibility
+
+    # Allow PORT to be set by hosting provider
     port = int(os.environ.get('PORT', 5000))
-    host = '0.0.0.0'
-    
+    host = '0.0.0.0' if os.environ.get(
+        'ENVIRONMENT') == 'production' else '127.0.0.1'
+
     app.run(debug=False, host=host, port=port)
