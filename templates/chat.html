@@ -15,6 +15,60 @@
             --card:#0b1220;
             --text:#e6eef8;
         }
+        [data-theme="ocean"]{
+            --bg:#0a1828;
+            --panel:#13283a;
+            --muted:#8ba3b8;
+            --accent:#00a8cc;
+            --accent-2:#0097a7;
+            --card:#0e2233;
+            --text:#e0f2f7;
+        }
+        [data-theme="forest"]{
+            --bg:#0d1b0d;
+            --panel:#162816;
+            --muted:#92a892;
+            --accent:#4caf50;
+            --accent-2:#2e7d32;
+            --card:#111f11;
+            --text:#e8f5e9;
+        }
+        [data-theme="sunset"]{
+            --bg:#1a0f0a;
+            --panel:#2a1a14;
+            --muted:#b89a8a;
+            --accent:#ff6b35;
+            --accent-2:#e63946;
+            --card:#1f1410;
+            --text:#fff3e0;
+        }
+        [data-theme="midnight"]{
+            --bg:#000000;
+            --panel:#1a1a1a;
+            --muted:#808080;
+            --accent:#bb86fc;
+            --accent-2:#03dac6;
+            --card:#0d0d0d;
+            --text:#ffffff;
+        }
+        [data-theme="lavender"]{
+            --bg:#1a0f20;
+            --panel:#2a1a3a;
+            --muted:#b8a8c8;
+            --accent:#b794f6;
+            --accent-2:#9f7aea;
+            --card:#1f1428;
+            --text:#f3e8ff;
+        }
+        [data-theme="cherry"]{
+            --bg:#1a0a14;
+            --panel:#2a1424;
+            --muted:#b88aa4;
+            --accent:#ec4899;
+            --accent-2:#be185d;
+            --card:#1f0f19;
+            --text:#fce7f3;
+        }
         *{box-sizing:border-box;margin:0;padding:0}
         html,body,#app{height:100%}
         body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto;background:var(--bg);color:var(--text)}
@@ -99,6 +153,27 @@
         .modal-btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px}
         .modal-btn.confirm{background:var(--accent);color:white}
         .modal-btn.cancel{background:rgba(255,255,255,0.05);color:var(--muted)}
+        
+        /* Settings Modal */
+        .settings-modal{max-width:700px;width:95%}
+        .settings-tabs{display:flex;gap:8px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px}
+        .settings-tab{padding:10px 20px;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:all 0.2s;border-bottom:2px solid transparent}
+        .settings-tab:hover{color:var(--text);background:rgba(255,255,255,0.02)}
+        .settings-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+        .settings-panel{display:none}
+        .settings-panel.active{display:block}
+        .settings-section{margin-bottom:24px}
+        .settings-section-title{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text)}
+        .settings-row{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(255,255,255,0.02);border-radius:8px;margin-bottom:8px}
+        .settings-label{color:var(--text);font-size:14px}
+        .settings-desc{color:var(--muted);font-size:12px;margin-top:4px}
+        .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px}
+        .theme-card{padding:16px;border-radius:8px;border:2px solid rgba(255,255,255,0.1);cursor:pointer;transition:all 0.2s;text-align:center}
+        .theme-card:hover{border-color:rgba(255,255,255,0.3);transform:translateY(-2px)}
+        .theme-card.active{border-color:var(--accent);background:rgba(124,92,255,0.1)}
+        .theme-preview{width:100%;height:40px;border-radius:6px;margin-bottom:8px;display:flex;gap:2px}
+        .theme-preview-color{flex:1;border-radius:4px}
+        .theme-name{font-size:13px;font-weight:600;color:var(--text)}
     </style>
 </head>
 <body>
@@ -122,11 +197,12 @@
                         <img src="{{ user.profile_image_url }}" alt="Profile">
                         {% else %}
                         <div style="width:100%;height:100%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700">
-                            {{ user.first_name[0] if user.first_name else 'U' }}
+                            {{ user.username[0].upper() if user.username else 'U' }}
                         </div>
                         {% endif %}
                     </div>
-                    <div class="user-name">{{ user.first_name or 'User' }}</div>
+                    <div class="user-name">{{ user.username or 'User' }}</div>
+                    <button class="logout-btn" id="settingsBtn" style="background:rgba(255,255,255,0.05);margin-right:8px">⚙️</button>
                     <a href="/logout" class="logout-btn">Logout</a>
                 </div>
             </div>
@@ -176,6 +252,125 @@
             <div class="modal-buttons">
                 <button class="modal-btn cancel" id="deleteChatCancelBtn">Cancel</button>
                 <button class="modal-btn confirm" id="deleteChatConfirmBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content settings-modal">
+            <div class="modal-title">Settings</div>
+            
+            <div class="settings-tabs">
+                <button class="settings-tab active" data-tab="general">General</button>
+                <button class="settings-tab" data-tab="account">Account</button>
+                <button class="settings-tab" data-tab="customization">Customization</button>
+            </div>
+            
+            <div class="settings-panel active" id="generalPanel">
+                <div class="settings-section">
+                    <div class="settings-section-title">Application</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Language</div>
+                            <div class="settings-desc">Choose your preferred language</div>
+                        </div>
+                        <select style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text)">
+                            <option>English</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-panel" id="accountPanel">
+                <div class="settings-section">
+                    <div class="settings-section-title">Profile</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Username</div>
+                            <div class="settings-desc">Change your display name</div>
+                        </div>
+                        <button class="modal-btn confirm" id="renameAccountBtn" style="padding:6px 16px">Rename</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-panel" id="customizationPanel">
+                <div class="settings-section">
+                    <div class="settings-section-title">Theme</div>
+                    <div class="theme-grid">
+                        <div class="theme-card active" data-theme="default">
+                            <div class="theme-preview">
+                                <div class="theme-preview-color" style="background:#7c5cff"></div>
+                                <div class="theme-preview-color" style="background:#10a37f"></div>
+                                <div class="theme-preview-color" style="background:#0b1020"></div>
+                            </div>
+                            <div class="theme-name">Default</div>
+                        </div>
+                        <div class="theme-card" data-theme="ocean">
+                            <div class="theme-preview">
+                                <div class="theme-preview-color" style="background:#00a8cc"></div>
+                                <div class="theme-preview-color" style="background:#0097a7"></div>
+                                <div class="theme-preview-color" style="background:#0a1828"></div>
+                            </div>
+                            <div class="theme-name">Ocean</div>
+                        </div>
+                        <div class="theme-card" data-theme="forest">
+                            <div class="theme-preview">
+                                <div class="theme-preview-color" style="background:#4caf50"></div>
+                                <div class="theme-preview-color" style="background:#2e7d32"></div>
+                                <div class="theme-preview-color" style="background:#0d1b0d"></div>
+                            </div>
+                            <div class="theme-name">Forest</div>
+                        </div>
+                        <div class="theme-card" data-theme="sunset">
+                            <div class="theme-preview">
+                                <div class="theme-preview-color" style="background:#ff6b35"></div>
+                                <div class="theme-preview-color" style="background:#e63946"></div>
+                                <div class="theme-preview-color" style="background:#1a0f0a"></div>
+                            </div>
+                            <div class="theme-name">Sunset</div>
+                        </div>
+                        <div class="theme-card" data-theme="midnight">
+                            <div class="theme-preview">
+                                <div class="theme-preview-color" style="background:#bb86fc"></div>
+                                <div class="theme-preview-color" style="background:#03dac6"></div>
+                                <div class="theme-preview-color" style="background:#000000"></div>
+                            </div>
+                            <div class="theme-name">Midnight</div>
+                        </div>
+                        <div class="theme-card" data-theme="lavender">
+                            <div class="theme-preview">
+                                <div class="theme-preview-color" style="background:#b794f6"></div>
+                                <div class="theme-preview-color" style="background:#9f7aea"></div>
+                                <div class="theme-preview-color" style="background:#1a0f20"></div>
+                            </div>
+                            <div class="theme-name">Lavender</div>
+                        </div>
+                        <div class="theme-card" data-theme="cherry">
+                            <div class="theme-preview">
+                                <div class="theme-preview-color" style="background:#ec4899"></div>
+                                <div class="theme-preview-color" style="background:#be185d"></div>
+                                <div class="theme-preview-color" style="background:#1a0a14"></div>
+                            </div>
+                            <div class="theme-name">Cherry</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-buttons" style="margin-top:20px">
+                <button class="modal-btn cancel" id="settingsCloseBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="renameAccountModal">
+        <div class="modal-content">
+            <div class="modal-title">Rename Account</div>
+            <input type="text" class="modal-input" id="renameAccountInput" placeholder="Enter new username">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="renameAccountCancelBtn">Cancel</button>
+                <button class="modal-btn confirm" id="renameAccountConfirmBtn">Save</button>
             </div>
         </div>
     </div>
@@ -426,6 +621,83 @@
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Settings modal
+        document.getElementById('settingsBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('settingsModal').classList.add('active');
+        });
+
+        document.getElementById('settingsCloseBtn').addEventListener('click', () => {
+            document.getElementById('settingsModal').classList.remove('active');
+        });
+
+        // Settings tabs
+        document.querySelectorAll('.settings-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + 'Panel').classList.add('active');
+            });
+        });
+
+        // Theme switching
+        const savedTheme = localStorage.getItem('theme') || 'default';
+        if (savedTheme !== 'default') {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.querySelectorAll('.theme-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.theme === savedTheme);
+            });
+        }
+
+        document.querySelectorAll('.theme-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const theme = card.dataset.theme;
+                document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                
+                if (theme === 'default') {
+                    document.documentElement.removeAttribute('data-theme');
+                } else {
+                    document.documentElement.setAttribute('data-theme', theme);
+                }
+                localStorage.setItem('theme', theme);
+            });
+        });
+
+        // Rename account
+        document.getElementById('renameAccountBtn').addEventListener('click', () => {
+            document.getElementById('settingsModal').classList.remove('active');
+            document.getElementById('renameAccountModal').classList.add('active');
+            document.getElementById('renameAccountInput').value = '{{ user.username }}';
+        });
+
+        document.getElementById('renameAccountCancelBtn').addEventListener('click', () => {
+            document.getElementById('renameAccountModal').classList.remove('active');
+        });
+
+        document.getElementById('renameAccountConfirmBtn').addEventListener('click', async () => {
+            const newUsername = document.getElementById('renameAccountInput').value.trim();
+            if (newUsername) {
+                try {
+                    const res = await fetch('/api/user/update', {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({username: newUsername})
+                    });
+                    
+                    if (res.ok) {
+                        location.reload();
+                    } else {
+                        const data = await res.json();
+                        alert(data.error || 'Failed to update username');
+                    }
+                } catch (err) {
+                    alert('Network error');
+                }
             }
         });
 

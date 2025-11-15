@@ -217,6 +217,25 @@ def delete_chat(chat_id):
     
     return jsonify({'success': True})
 
+@app.route('/api/user/update', methods=['PUT'])
+@require_login
+def update_user():
+    data = request.json
+    new_username = data.get('username', '').strip()
+    
+    if not new_username:
+        return jsonify({'error': 'Username is required'}), 400
+    
+    if new_username != current_user.username:
+        existing = User.query.filter_by(username=new_username).first()
+        if existing:
+            return jsonify({'error': 'Username already taken'}), 400
+    
+    current_user.username = new_username
+    db.session.commit()
+    
+    return jsonify({'success': True})
+
 @app.route('/api/ask', methods=['POST'])
 @require_login
 def ask():
