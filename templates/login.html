@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FrankieGPT</title>
+    <style>
+        :root{
+            --bg:#0b1020;
+            --panel:#0f1724;
+            --muted:#94a3b8;
+            --accent:#7c5cff;
+            --text:#e6eef8;
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto;background:linear-gradient(135deg,var(--bg) 0%,#1a1f3a 100%);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .container{max-width:400px;width:100%;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:40px;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+        .logo{text-align:center;font-size:48px;margin-bottom:10px}
+        h1{text-align:center;font-size:28px;margin-bottom:8px}
+        .subtitle{text-align:center;color:var(--muted);margin-bottom:30px;font-size:14px}
+        .form-group{margin-bottom:20px}
+        label{display:block;margin-bottom:8px;font-size:14px;color:var(--muted)}
+        input{width:100%;padding:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-size:14px;transition:all 0.2s}
+        input:focus{outline:none;border-color:var(--accent);background:rgba(255,255,255,0.08)}
+        .btn{width:100%;padding:14px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.2s}
+        .btn:hover{background:rgba(124,92,255,0.8);transform:translateY(-2px)}
+        .btn:disabled{opacity:0.5;cursor:not-allowed}
+        .error{color:#ff6b6b;font-size:14px;margin-top:10px;text-align:center}
+        .link{text-align:center;margin-top:20px;font-size:14px;color:var(--muted)}
+        .link a{color:var(--accent);text-decoration:none}
+        .link a:hover{text-decoration:underline}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🤖</div>
+        <h1>Welcome Back</h1>
+        <p class="subtitle">Login to continue to FrankieGPT</p>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn" id="loginBtn">Login</button>
+            <div id="error" class="error"></div>
+        </form>
+        
+        <div class="link">
+            Don't have an account? <a href="/register">Register</a>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('loginForm');
+        const errorDiv = document.getElementById('error');
+        const loginBtn = document.getElementById('loginBtn');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorDiv.textContent = '';
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    window.location.href = data.redirect;
+                } else {
+                    errorDiv.textContent = data.error || 'Login failed';
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Login';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Network error. Please try again.';
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        });
+    </script>
+</body>
+</html>

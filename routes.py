@@ -1,13 +1,26 @@
 import os
 import json
-from flask import session, request, jsonify, render_template, url_for
+from flask import session, request, jsonify, render_template, url_for, redirect, flash
 from app import app, db
-from replit_auth import require_login, make_replit_blueprint
-from flask_login import current_user
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 import requests
-from models import Chat, Message
+from models import User, Chat, Message
+from functools import wraps
 
-app.register_blueprint(make_replit_blueprint(), url_prefix="/auth")
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+
+def require_login(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return jsonify({'error': 'Authentication required'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
 OPENROUTER_MODEL = os.environ.get('OPENROUTER_MODEL', 'gpt-4o-mini')
@@ -67,7 +80,66 @@ def try_run_openrouter(prompt, max_tokens=2000, temperature=0.2, images=None):
 def index_route():
     if current_user.is_authenticated:
         return render_template('chat.html', user=current_user)
-    return render_template('landing.html')
+    return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index_route'))
+    
+    if request.method == 'POST':
+        data = request.json
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        
+        if not username or not password:
+            return jsonify({'error': 'Username and password required'}), 400
+        
+        user = User.query.filter_by(username=username).first()
+        
+        if user and user.check_password(password):
+            login_user(user)
+            return jsonify({'success': True, 'redirect': url_for('index_route')})
+        
+        return jsonify({'error': 'Invalid username or password'}), 401
+    
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index_route'))
+    
+    if request.method == 'POST':
+        data = request.json
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        email = data.get('email', '').strip()
+        
+        if not username or not password:
+            return jsonify({'error': 'Username and password required'}), 400
+        
+        if User.query.filter_by(username=username).first():
+            return jsonify({'error': 'Username already exists'}), 400
+        
+        if email and User.query.filter_by(email=email).first():
+            return jsonify({'error': 'Email already registered'}), 400
+        
+        user = User(username=username, email=email or None)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        
+        login_user(user)
+        return jsonify({'success': True, 'redirect': url_for('index_route')})
+    
+    return render_template('register.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 @app.route('/api/chats', methods=['GET'])
 @require_login
