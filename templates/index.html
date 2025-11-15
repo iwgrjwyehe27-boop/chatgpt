@@ -113,12 +113,69 @@
         .modal-btn.cancel{background:rgba(255,255,255,0.05);color:var(--muted)}
         .modal-btn.cancel:hover{background:rgba(255,255,255,0.1);color:var(--text)}
         
-        @media (max-width:900px){.sidebar{width:0;padding:0;border:none}.main-inner{padding:16px}}
+        /* Mobile menu button */
+        .mobile-menu-btn{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:var(--accent);color:white;border:none;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:20px;transition:all 0.2s ease;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+        .mobile-menu-btn:hover{background:rgba(124,92,255,0.8);transform:scale(1.05)}
+        .mobile-menu-btn:active{transform:scale(0.95)}
+        
+        /* Responsive styles for tablets and phones */
+        @media (max-width:900px){
+            .mobile-menu-btn{display:block}
+            .sidebar{position:fixed;left:-100%;top:0;height:100vh;width:280px;z-index:1000;transition:left 0.3s ease;box-shadow:2px 0 10px rgba(0,0,0,0.5)}
+            .sidebar.open{left:0}
+            .main-inner{padding:16px;padding-top:60px}
+            .hero-title{font-size:24px;padding:0 20px}
+            .hero-subtitle{font-size:14px}
+            .message.user .content,.message.assistant .content{max-width:85%}
+            .input-wrapper{padding:0 8px}
+            .modal-content{width:95%;padding:20px}
+            .chat-item-actions{display:flex!important}
+            .chat-item{padding-right:4px}
+        }
+        
+        @media (max-width:600px){
+            .mobile-menu-btn{top:8px;left:8px;padding:8px 10px;font-size:18px}
+            .sidebar{width:260px}
+            .main-inner{padding:12px;padding-top:55px}
+            .hero-title{font-size:20px;padding:0 16px}
+            .hero-subtitle{font-size:13px}
+            .message.user .content,.message.assistant .content{max-width:90%;font-size:14px;padding:10px 14px}
+            .input-section{padding:12px 8px}
+            .input-form textarea{font-size:14px;min-height:44px;padding:10px 12px;padding-right:45px}
+            .input-form button{width:44px;height:44px;font-size:20px}
+            .input-form .img-btn{width:36px;height:36px;font-size:18px;right:4px;bottom:4px}
+            .message-image{max-width:250px;max-height:250px}
+            .brand{font-size:13px}
+            .new-chat-btn{font-size:12px;padding:9px}
+            .sidebar-label{font-size:10px}
+            .chat-item{font-size:12px;padding:9px}
+            .user-profile{font-size:12px}
+            .user-avatar{width:28px;height:28px;font-size:11px}
+        }
+        
+        @media (max-width:400px){
+            .hero-title{font-size:18px}
+            .message.user .content,.message.assistant .content{max-width:95%;font-size:13px;padding:8px 12px}
+            .message-image{max-width:200px;max-height:200px}
+            .input-form textarea{font-size:13px;min-height:42px}
+        }
+        
+        /* Overlay for mobile sidebar */
+        .sidebar-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999;transition:opacity 0.3s ease}
+        .sidebar-overlay.active{display:block;animation:fadeIn 0.3s ease}
+        
+        /* Always show chat actions on touch devices (regardless of screen size) */
+        @media (hover: none) and (pointer: coarse){
+            .chat-item-actions{display:flex!important}
+            .chat-item{padding-right:4px}
+        }
     </style>
 </head>
 <body>
+    <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="app" id="app">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="brand">ChatGPT</div>
             <button class="new-chat-btn" id="newChatBtn">+ New chat</button>
             
@@ -532,6 +589,50 @@
                 e.preventDefault();
                 document.getElementById('chatForm').dispatchEvent(new Event('submit'));
             }
+        });
+        
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        function toggleMobileMenu() {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('active');
+        }
+        
+        function closeMobileMenu() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+        }
+        
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+        sidebarOverlay.addEventListener('click', closeMobileMenu);
+        
+        // Close mobile menu when clicking on a chat item
+        document.getElementById('chatList').addEventListener('click', (e) => {
+            if (e.target.classList.contains('chat-item-title')) {
+                setTimeout(closeMobileMenu, 100);
+            }
+        });
+        
+        // Close mobile menu when clicking new chat button
+        document.getElementById('newChatBtn').addEventListener('click', () => {
+            setTimeout(closeMobileMenu, 100);
+        });
+        
+        // Detect device type and log for analytics (optional)
+        function detectDevice() {
+            const width = window.innerWidth;
+            if (width <= 600) return 'mobile';
+            if (width <= 900) return 'tablet';
+            return 'desktop';
+        }
+        
+        // Update on resize
+        window.addEventListener('resize', () => {
+            const device = detectDevice();
+            // You can use this for analytics or conditional features if needed
         });
         
         loadUserData();
