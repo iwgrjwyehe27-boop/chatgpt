@@ -274,9 +274,100 @@
                             <div class="settings-label">Language</div>
                             <div class="settings-desc">Choose your preferred language</div>
                         </div>
-                        <select style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text)">
-                            <option>English</option>
+                        <select id="languageSelect" style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text)">
+                            <option value="en">English</option>
+                            <option value="es">Español (Spanish)</option>
+                            <option value="fr">Français (French)</option>
+                            <option value="de">Deutsch (German)</option>
+                            <option value="it">Italiano (Italian)</option>
+                            <option value="pt">Português (Portuguese)</option>
+                            <option value="ru">Русский (Russian)</option>
+                            <option value="zh">中文 (Chinese)</option>
+                            <option value="ja">日本語 (Japanese)</option>
+                            <option value="ko">한국어 (Korean)</option>
+                            <option value="ar">العربية (Arabic)</option>
+                            <option value="hi">हिन्दी (Hindi)</option>
+                            <option value="bn">বাংলা (Bengali)</option>
+                            <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                            <option value="te">తెలుగు (Telugu)</option>
+                            <option value="mr">मराठी (Marathi)</option>
+                            <option value="ta">தமிழ் (Tamil)</option>
+                            <option value="ur">اردو (Urdu)</option>
+                            <option value="tr">Türkçe (Turkish)</option>
+                            <option value="vi">Tiếng Việt (Vietnamese)</option>
+                            <option value="pl">Polski (Polish)</option>
+                            <option value="uk">Українська (Ukrainian)</option>
+                            <option value="nl">Nederlands (Dutch)</option>
+                            <option value="sv">Svenska (Swedish)</option>
+                            <option value="no">Norsk (Norwegian)</option>
+                            <option value="da">Dansk (Danish)</option>
+                            <option value="fi">Suomi (Finnish)</option>
+                            <option value="cs">Čeština (Czech)</option>
+                            <option value="el">Ελληνικά (Greek)</option>
+                            <option value="he">עברית (Hebrew)</option>
+                            <option value="th">ไทย (Thai)</option>
+                            <option value="id">Bahasa Indonesia</option>
+                            <option value="ms">Bahasa Melayu (Malay)</option>
+                            <option value="fil">Filipino</option>
+                            <option value="ro">Română (Romanian)</option>
+                            <option value="hu">Magyar (Hungarian)</option>
+                            <option value="sk">Slovenčina (Slovak)</option>
+                            <option value="bg">Български (Bulgarian)</option>
+                            <option value="hr">Hrvatski (Croatian)</option>
+                            <option value="sr">Српски (Serbian)</option>
+                            <option value="lt">Lietuvių (Lithuanian)</option>
+                            <option value="lv">Latviešu (Latvian)</option>
+                            <option value="et">Eesti (Estonian)</option>
+                            <option value="sl">Slovenščina (Slovenian)</option>
+                            <option value="fa">فارسی (Persian)</option>
+                            <option value="sw">Kiswahili (Swahili)</option>
+                            <option value="am">አማርኛ (Amharic)</option>
+                            <option value="ne">नेपाली (Nepali)</option>
+                            <option value="si">සිංහල (Sinhala)</option>
+                            <option value="km">ខ្មែរ (Khmer)</option>
+                            <option value="my">မြန်မာ (Burmese)</option>
+                            <option value="ka">ქართული (Georgian)</option>
+                            <option value="hy">Հայերեն (Armenian)</option>
+                            <option value="az">Azərbaycan (Azerbaijani)</option>
+                            <option value="kk">Қазақ (Kazakh)</option>
+                            <option value="uz">O'zbek (Uzbek)</option>
                         </select>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Auto-save Chats</div>
+                            <div class="settings-desc">Automatically save chat history</div>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                            <input type="checkbox" id="autoSave" checked style="cursor:pointer">
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Show Timestamps</div>
+                            <div class="settings-desc">Display message timestamps</div>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                            <input type="checkbox" id="showTimestamps" style="cursor:pointer">
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Sound Notifications</div>
+                            <div class="settings-desc">Play sound on new messages</div>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                            <input type="checkbox" id="soundNotif" style="cursor:pointer">
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Compact Mode</div>
+                            <div class="settings-desc">Use compact message layout</div>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                            <input type="checkbox" id="compactMode" style="cursor:pointer">
+                        </label>
                     </div>
                 </div>
             </div>
@@ -290,6 +381,34 @@
                             <div class="settings-desc">Change your display name</div>
                         </div>
                         <button class="modal-btn confirm" id="renameAccountBtn" style="padding:6px 16px">Rename</button>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Email</div>
+                            <div class="settings-desc">Update your email address</div>
+                        </div>
+                        <button class="modal-btn confirm" style="padding:6px 16px">Update</button>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Password</div>
+                            <div class="settings-desc">Change your password</div>
+                        </div>
+                        <button class="modal-btn confirm" style="padding:6px 16px">Change</button>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Two-Factor Authentication</div>
+                            <div class="settings-desc">Add extra security to your account</div>
+                        </div>
+                        <button class="modal-btn confirm" style="padding:6px 16px">Enable</button>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Export Data</div>
+                            <div class="settings-desc">Download all your chat history</div>
+                        </div>
+                        <button class="modal-btn confirm" style="padding:6px 16px">Export</button>
                     </div>
                 </div>
             </div>
@@ -354,6 +473,54 @@
                             </div>
                             <div class="theme-name">Cherry</div>
                         </div>
+                    </div>
+                </div>
+                <div class="settings-section" style="margin-top:24px">
+                    <div class="settings-section-title">Display</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Font Size</div>
+                            <div class="settings-desc">Adjust message text size</div>
+                        </div>
+                        <select id="fontSize" style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text)">
+                            <option value="small">Small</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Message Density</div>
+                            <div class="settings-desc">Spacing between messages</div>
+                        </div>
+                        <select id="messageDensity" style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text)">
+                            <option value="compact">Compact</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="comfortable">Comfortable</option>
+                        </select>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Sidebar Width</div>
+                            <div class="settings-desc">Adjust sidebar size</div>
+                        </div>
+                        <select id="sidebarWidth" style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text)">
+                            <option value="narrow">Narrow</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="wide">Wide</option>
+                        </select>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-label">Code Highlighting</div>
+                            <div class="settings-desc">Syntax highlighting theme for code</div>
+                        </div>
+                        <select id="codeTheme" style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text)">
+                            <option value="monokai">Monokai</option>
+                            <option value="github">GitHub</option>
+                            <option value="dracula" selected>Dracula</option>
+                            <option value="nord">Nord</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -628,6 +795,7 @@
         document.getElementById('settingsBtn').addEventListener('click', (e) => {
             e.preventDefault();
             document.getElementById('settingsModal').classList.add('active');
+            loadSettings();
         });
 
         document.getElementById('settingsCloseBtn').addEventListener('click', () => {
@@ -642,6 +810,66 @@
                 tab.classList.add('active');
                 document.getElementById(tab.dataset.tab + 'Panel').classList.add('active');
             });
+        });
+
+        // Load and save settings
+        function loadSettings() {
+            const language = localStorage.getItem('language') || 'en';
+            const autoSave = localStorage.getItem('autoSave') !== 'false';
+            const showTimestamps = localStorage.getItem('showTimestamps') === 'true';
+            const soundNotif = localStorage.getItem('soundNotif') === 'true';
+            const compactMode = localStorage.getItem('compactMode') === 'true';
+            const fontSize = localStorage.getItem('fontSize') || 'medium';
+            const messageDensity = localStorage.getItem('messageDensity') || 'normal';
+            const sidebarWidth = localStorage.getItem('sidebarWidth') || 'normal';
+            const codeTheme = localStorage.getItem('codeTheme') || 'dracula';
+
+            document.getElementById('languageSelect').value = language;
+            document.getElementById('autoSave').checked = autoSave;
+            document.getElementById('showTimestamps').checked = showTimestamps;
+            document.getElementById('soundNotif').checked = soundNotif;
+            document.getElementById('compactMode').checked = compactMode;
+            document.getElementById('fontSize').value = fontSize;
+            document.getElementById('messageDensity').value = messageDensity;
+            document.getElementById('sidebarWidth').value = sidebarWidth;
+            document.getElementById('codeTheme').value = codeTheme;
+        }
+
+        // Save settings on change
+        document.getElementById('languageSelect').addEventListener('change', (e) => {
+            localStorage.setItem('language', e.target.value);
+        });
+
+        document.getElementById('autoSave').addEventListener('change', (e) => {
+            localStorage.setItem('autoSave', e.target.checked);
+        });
+
+        document.getElementById('showTimestamps').addEventListener('change', (e) => {
+            localStorage.setItem('showTimestamps', e.target.checked);
+        });
+
+        document.getElementById('soundNotif').addEventListener('change', (e) => {
+            localStorage.setItem('soundNotif', e.target.checked);
+        });
+
+        document.getElementById('compactMode').addEventListener('change', (e) => {
+            localStorage.setItem('compactMode', e.target.checked);
+        });
+
+        document.getElementById('fontSize').addEventListener('change', (e) => {
+            localStorage.setItem('fontSize', e.target.value);
+        });
+
+        document.getElementById('messageDensity').addEventListener('change', (e) => {
+            localStorage.setItem('messageDensity', e.target.value);
+        });
+
+        document.getElementById('sidebarWidth').addEventListener('change', (e) => {
+            localStorage.setItem('sidebarWidth', e.target.value);
+        });
+
+        document.getElementById('codeTheme').addEventListener('change', (e) => {
+            localStorage.setItem('codeTheme', e.target.value);
         });
 
         // Theme switching
