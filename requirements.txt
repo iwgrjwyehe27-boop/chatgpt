@@ -12,3 +12,10 @@ requests==2.31.0
 typing-extensions
 Werkzeug>=2.3.3
 Whoosh==2.7.4
+flask-dance
+flask-login
+flask-sqlalchemy
+oauthlib
+psycopg2-binary==2.9.9
+pyjwt
+sqlalchemy
